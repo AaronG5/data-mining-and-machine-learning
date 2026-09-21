@@ -69,5 +69,6 @@ def main():
       table = descriptive_statistics(part)
 
       export_table_csv(table, filename)
+      plot_distribution(df[FEATURES[5]], FEATURES[5], OUT_DIR)
 
 main()
