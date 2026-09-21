@@ -1,5 +1,4 @@
 import pandas as pd
-import dataframe_image as dfi
 import matplotlib.pyplot as plt
 
 FILE = 'A27/A27.csv'
@@ -27,10 +26,6 @@ def descriptive_statistics(part: pd.DataFrame) -> pd.DataFrame:
       })
 
    return pd.DataFrame(rows)
-
-def export_table_png(table: pd.DataFrame, filename: str) -> None:
-   styled = table.style.format(precision=4).hide(axis='index')
-   dfi.export(styled, filename + '.png')
 
 def export_table_csv(table: pd.DataFrame, filename: str) -> None:
    table.to_csv(filename + '.csv', index=False, float_format='%.4f')
