@@ -6,12 +6,11 @@ CLASSES = ['Bumps', 'Other_Faults']
 FEATURES = ['Log_X_Index', 'Log_Y_Index', 'Empty_Index', 'Square_Index', 'Length_of_Conveyer',
              'Steel_Plate_Thickness', 'Edges_Index', 'Orientation_Index', 'LogOfAreas', 'Luminosity_Index']
 
-df = pd.read_csv(FILE)
 df = pd.read_csv(FILE, skipinitialspace=True)
 df.columns = df.columns.str.strip()
 df['class'] = df['class'].str.strip()
 
-def aprosomoji_statistika(part: pd.DataFrame):
+def descriptive_statistics(part: pd.DataFrame):
    classifiers = part[FEATURES]
    rows = []
 
@@ -39,15 +38,28 @@ def export_table_png(table, filename):
 def export_table_csv(table, filename):
    table.to_csv(filename + '.csv', index=False, float_format='%.4f')
 
+def check_for_duplicates(data: pd.DataFrame):
+   dupes = data.duplicated(keep='first')
+
+   print(f'Total rows: {len(data)}')
+   print(f'Duplicate rows: {data.duplicated().sum()}')
+
+   return data[dupes]
+
+# duplicates = check_for_duplicates(df)
+# print(duplicates)
+
+df = df.drop_duplicates().reset_index(drop=True)
+
 filename = 'bendra_aprasomoji_statistika'
-table = aprosomoji_statistika(df)
+table = descriptive_statistics(df)
 export_table_csv(table, filename)
 
 for class_name in CLASSES:
    filename = class_name + '_aprasomoji_statistika'
    part = df[df['class'] == class_name]
 
-   table = aprosomoji_statistika(part)
+   table = descriptive_statistics(part)
 
    # export_table_png(table, filename)
    export_table_csv(table, filename)
