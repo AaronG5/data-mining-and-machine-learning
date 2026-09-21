@@ -12,7 +12,7 @@ def descriptive_statistics(part: pd.DataFrame) -> pd.DataFrame:
    rows = []
 
    for col in classifiers.columns:
-      num = pd.to_numeric(classifiers[col].astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
+      num = pd.to_numeric(classifiers[col].astype(str).str.strip(), errors='coerce')
 
       rows.append({
          'Požymis': col,
@@ -50,7 +50,9 @@ def main():
    df = pd.read_csv(FILE, skipinitialspace=True)
    df.columns = df.columns.str.strip()
    df['class'] = df['class'].str.strip()
-
+   df['Steel_Plate_Thickness'] = pd.to_numeric(df['Steel_Plate_Thickness']
+                                 .astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
+   
    # duplicates = check_for_duplicates(df)
    # print(duplicates)
 
