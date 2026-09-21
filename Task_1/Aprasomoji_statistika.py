@@ -1,7 +1,8 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import os
 
-FILE = 'A27/A27.csv'
+from histogram import plot_distribution
+
 CLASSES = ['Bumps', 'Other_Faults']
 FEATURES = ['Log_X_Index', 'Log_Y_Index', 'Empty_Index', 'Square_Index', 'Length_of_Conveyer',
              'Steel_Plate_Thickness', 'Edges_Index', 'Orientation_Index', 'LogOfAreas', 'Luminosity_Index']
@@ -40,6 +41,12 @@ def check_for_duplicates(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def main():
+
+   BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+   FILE = os.path.join(BASE_DIR, 'A27', 'A27.csv') 
+   OUT_DIR = os.path.join(BASE_DIR, 'res')
+   os.makedirs(OUT_DIR, exist_ok=True)
+
    df = pd.read_csv(FILE, skipinitialspace=True)
    df.columns = df.columns.str.strip()
    df['class'] = df['class'].str.strip()
@@ -59,7 +66,6 @@ def main():
 
       table = descriptive_statistics(part)
 
-      # export_table_png(table, filename)
       export_table_csv(table, filename)
 
 main()
