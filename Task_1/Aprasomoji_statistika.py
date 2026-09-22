@@ -60,10 +60,12 @@ def main():
 
    filename = 'bendra_aprasomoji_statistika'
    table = descriptive_statistics(df)
-   export_table_csv(table, filename)
+   # export_table_csv(table, filename)
+
+   directory = os.path.join(OUT_DIR, 'Bendra')
+   os.makedirs(directory, exist_ok=True)
 
    for feature in FEATURES:
-      directory = os.path.join(OUT_DIR, 'Bendra')
       plot_distribution(df[feature], feature, directory)
 
    for class_name in CLASSES:
@@ -75,8 +77,8 @@ def main():
          os.makedirs(directory, exist_ok=True)
          plot_distribution(part[feature], feature, directory, class_name)
 
-      table = descriptive_statistics(part)
+      # table = descriptive_statistics(part)
 
-      export_table_csv(table, filename)
+      # export_table_csv(table, filename)
 
 main()
