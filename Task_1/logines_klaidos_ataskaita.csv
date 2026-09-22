@@ -1,0 +1,7 @@
+Požymis,Taisyklė,Pažeidimų
+Empty_Index,"[0, 1]",4
+Square_Index,"[0, 1]",0
+Edges_Index,"[0, 1]",0
+Orientation_Index,"[-1, 1]",0
+Length_of_Conveyer,> 0,0
+Steel_Plate_Thickness,> 0,0
