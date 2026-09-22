@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 
-def plot_distribution(values: pd.Series, title: str, out_dir: str, save_as_png: bool=True, show: bool=False, bins=10) -> None:
+def plot_distribution(values: pd.Series, title: str, out_dir: str, class_name: str=None, save_as_png: bool=True, show: bool=False, bins=10) -> None:
    values = pd.to_numeric(values, errors='coerce').dropna()
    mean = values.mean()
    std = values.std()
@@ -14,7 +14,10 @@ def plot_distribution(values: pd.Series, title: str, out_dir: str, save_as_png: 
    _, edges, _ = plt.hist(values, bins, density=False, alpha=0.5, color='steelblue', edgecolor='black')
    # bin_width = edges[1] - edges[0]
 
-   plt.xticks(edges, [f'{e}' for e in edges])
+   if title == 'Length_of_Conveyer' or title == 'Steel_Plate_Thickness':
+      plt.xticks(edges, [f'{e}' for e in edges])
+   else:
+      plt.xticks(edges, [f'{e:.4f}' for e in edges])
    plt.xlim((values.min(), values.max()))
 
    # if std > 0:
@@ -27,14 +30,17 @@ def plot_distribution(values: pd.Series, title: str, out_dir: str, save_as_png: 
    plt.axvline(q1, color='orange', label=f'1-as kvartilis = {q1:.2f}')
    plt.axvline(q3, color='blue', label=f'3-as kvartilis = {q3:.2f}')
 
-   plt.title(title)
+   if class_name is None:
+      plt.title(f'Bendra \"{title}\" požymio histograma')
+   else: 
+      plt.title(f'\"{class_name}\" klasės \"{title}\" požymio histograma')
    plt.xlabel('Įgyjamų reikšmių intervalai')
    plt.ylabel('Dažnis')
    plt.legend(fontsize=8)
 
    if save_as_png:
       file_dest = title + '.png'
-      plt.savefig(os.path.join(out_dir, file_dest), dpi=150, bbox_inches='tight')
+      plt.savefig(os.path.join(out_dir, file_dest), dpi=300, bbox_inches='tight')
 
    if show:
       plt.show()
