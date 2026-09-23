@@ -65,8 +65,16 @@ def main():
    directory = os.path.join(OUT_DIR, 'Bendra')
    os.makedirs(directory, exist_ok=True)
 
-   for feature in FEATURES:
-      plot_distribution(df[feature], feature, directory)
+   # for feature in FEATURES:
+   #    plot_distribution(df[feature], feature, directory)
+
+   feature_ranges = {
+      feature: (
+         pd.to_numeric(df[feature], errors='coerce').min(),
+         pd.to_numeric(df[feature], errors='coerce').max()
+      )
+      for feature in FEATURES
+   }
 
    for class_name in CLASSES:
       filename = class_name + '_aprasomoji_statistika'
@@ -75,7 +83,8 @@ def main():
       for feature in FEATURES:
          directory = os.path.join(OUT_DIR, class_name)
          os.makedirs(directory, exist_ok=True)
-         plot_distribution(part[feature], feature, directory, class_name)
+         x_min, x_max = feature_ranges[feature]
+         plot_distribution(part[feature], feature, directory, class_name, x_min=x_min, x_max=x_max)
 
       # table = descriptive_statistics(part)
 
