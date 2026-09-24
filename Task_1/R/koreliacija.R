@@ -1,6 +1,6 @@
 library(corrplot)
 
-FILE <- "../A27_svarus.csv"
+FILE <- "../A27_be_virsutiniu_isskirciu.csv"
 OUT_DIR <- "../kor_rez"
 FEATURES <- c("Log_X_Index", "Log_Y_Index", "Empty_Index", "Square_Index", "Length_of_Conveyer",
               "Steel_Plate_Thickness", "Edges_Index", "Orientation_Index", "LogOfAreas", "Luminosity_Index")
