@@ -1,7 +1,29 @@
 Požymis,Taisyklė,Pažeidimų
-Empty_Index,"[0, 1]",4
-Square_Index,"[0, 1]",0
-Edges_Index,"[0, 1]",0
-Orientation_Index,"[-1, 1]",0
+X_Minimum,>= 0,0
+X_Maximum,>= 0,0
+Y_Minimum,>= 0,0
+Y_Maximum,>= 0,0
+Pixels_Areas,> 0,0
+X_Perimeter,> 0,0
+Y_Perimeter,> 0,3
+Sum_of_Luminosity,> 0,0
+Minimum_of_Luminosity,"[0, 255]",0
+Maximum_of_Luminosity,"[0, 255]",0
 Length_of_Conveyer,> 0,0
 Steel_Plate_Thickness,> 0,0
+Edges_Index,"[0, 1]",0
+Empty_Index,"[0, 1]",4
+Square_Index,"[0, 1]",0
+Outside_X_Index,"[0, 1]",0
+Edges_X_Index,"[0, 1]",0
+Edges_Y_Index,"[0, 1]",0
+Outside_Global_Index,"[0, 1]",0
+LogOfAreas,>= 0,0
+Log_X_Index,>= 0,0
+Log_Y_Index,>= 0,0
+Orientation_Index,"[-1, 1]",0
+Luminosity_Index,"[-1, 1]",0
+SigmoidOfAreas,"[0, 1]",0
+X_Minimum <= X_Maximum,santykis,4
+Y_Minimum <= Y_Maximum,santykis,0
+Min_Luminosity <= Max_Luminosity,santykis,0

@@ -1,5 +1,9 @@
 Požymis,Klasė,Trūkstamos reikšmės,Tikras vidurkis (be trūkstamų),Tikra mediana (be trūkstamų),Vidurkis po užpildymo vidurkiu,Vidurkis po užpildymo mediana,Std. po užpildymo vidurkiu,Std. po užpildymo mediana,Asimetrija po užpildymo vidurkiu,Asimetrija po užpildymo mediana
 Edges_Index,Bumps,2,0.4688,0.4444,0.4688,0.4687,0.2903,0.2904,0.0971,0.0984
 Edges_Index,Other_Faults,9,0.3704,0.3127,0.3704,0.3696,0.2875,0.2876,0.4148,0.4225
+Edges_X_Index,Bumps,3,0.6991,0.7222,0.6991,0.6993,0.1724,0.1724,-0.5188,-0.5216
+Edges_X_Index,Other_Faults,8,0.6336,0.6429,0.6336,0.6337,0.2432,0.2432,-0.2388,-0.2402
+Edges_Y_Index,Bumps,3,0.9182,1.0000,0.9182,0.9188,0.1598,0.1600,-2.2798,-2.2837
+Edges_Y_Index,Other_Faults,8,0.8332,0.9375,0.8332,0.8345,0.2189,0.2192,-1.4032,-1.4133
 Luminosity_Index,Bumps,7,-0.1493,-0.1422,-0.1493,-0.1491,0.0926,0.0926,-0.4926,-0.4965
 Luminosity_Index,Other_Faults,4,-0.1236,-0.1188,-0.1236,-0.1236,0.1670,0.1670,0.3778,0.3773
