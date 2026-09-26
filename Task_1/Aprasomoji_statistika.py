@@ -24,8 +24,7 @@ def descriptive_statistics(part: pd.DataFrame) -> pd.DataFrame:
          'Vidurkis': num.mean(),
          '3-as kvartilis': num.quantile(0.75),
          'Maksimumas': num.max(),
-         'Std. nuokrypis': num.std(ddof=1),
-         'Neegzistuojančios reikšmės': int(num.isna().sum())
+         'Std. nuokrypis': num.std(ddof=1)
       })
 
    return pd.DataFrame(rows)
@@ -34,39 +33,26 @@ def export_table_csv(table: pd.DataFrame, filename: str) -> None:
    file_dest = os.path.join(OUT_DIR, filename + '.csv')
    table.to_csv(file_dest, index=False, float_format='%.4f')
 
-def check_for_duplicates(data: pd.DataFrame) -> pd.DataFrame:
-   dupes = data.duplicated(keep='first')
-
-   print(f'Total rows: {len(data)}')
-   print(f'Duplicate rows: {data.duplicated().sum()}')
-
-   return data[dupes]
-
-
 def main():
    os.makedirs(OUT_DIR, exist_ok=True)
-   FILE = os.path.join(BASE_DIR, 'A27', 'A27.csv') 
+   # FILE = os.path.join(BASE_DIR, 'A27', 'A27.csv')
+   FILE = os.path.join(BASE_DIR, 'A27_be_virsutiniu_isskirciu.csv')
 
    df = pd.read_csv(FILE, skipinitialspace=True)
    df.columns = df.columns.str.strip()
    df['class'] = df['class'].str.strip()
    df['Steel_Plate_Thickness'] = pd.to_numeric(df['Steel_Plate_Thickness']
                                  .astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
-   
-   # duplicates = check_for_duplicates(df)
-   # print(duplicates)
 
-   df = df.drop_duplicates().reset_index(drop=True)
-
-   filename = 'bendra_aprasomoji_statistika'
-   table = descriptive_statistics(df)
-   # export_table_csv(table, filename)
+   # file_path = os.path.join(OUT_DIR, 'bendra_aprasomoji_statistika')
+   # table = descriptive_statistics(df)
+   # export_table_csv(table, file_path)
 
    directory = os.path.join(OUT_DIR, 'Bendra')
    os.makedirs(directory, exist_ok=True)
 
-   # for feature in FEATURES:
-   #    plot_distribution(df[feature], feature, directory)
+   for feature in FEATURES:
+      plot_distribution(df[feature], feature, directory)
 
    feature_ranges = {
       feature: (
@@ -77,17 +63,16 @@ def main():
    }
 
    for class_name in CLASSES:
-      filename = class_name + '_aprasomoji_statistika'
+      file_path = class_name + '_aprasomoji_statistika'
       part = df[df['class'] == class_name]
+      directory = os.path.join(OUT_DIR, class_name)
+      os.makedirs(directory, exist_ok=True)
 
       for feature in FEATURES:
-         directory = os.path.join(OUT_DIR, class_name)
-         os.makedirs(directory, exist_ok=True)
          x_min, x_max = feature_ranges[feature]
          plot_distribution(part[feature], feature, directory, class_name, x_min=x_min, x_max=x_max)
 
       # table = descriptive_statistics(part)
-
-      # export_table_csv(table, filename)
+      # export_table_csv(table, file_path)
 
 main()
