@@ -63,6 +63,7 @@ def rysio_pazeidimai(part: pd.DataFrame):
    klaidos |= part['X_Minimum'] > part['X_Maximum']
    klaidos |= part['Y_Minimum'] > part['Y_Maximum']
    klaidos |= part['Minimum_of_Luminosity'] > part['Maximum_of_Luminosity']
+   klaidos |= ((part['LogOfAreas'] - np.log10(part['Pixels_Areas'].clip(lower=1e-9))).abs() > LOG_AREA_TOLERANCE)
    return klaidos
 
 def rasti_logines_klaidas(part: pd.DataFrame):
