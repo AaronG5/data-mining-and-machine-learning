@@ -1,22 +1,25 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
 FILE = 'A27_be_loginiu_klaidu.csv'
 CLASSES = ['Bumps', 'Other_Faults']
 
-FEATURES = ['Log_X_Index', 'Log_Y_Index', 'Empty_Index', 'Square_Index',
-            'Length_of_Conveyer', 'Steel_Plate_Thickness', 'Edges_Index',
-            'Orientation_Index', 'LogOfAreas', 'Luminosity_Index']
-
-BOUNDED_FEATURES = ['Edges_Index', 'Empty_Index', 'Square_Index',
-                     'Orientation_Index', 'Luminosity_Index']
-
-UNBOUNDED_FEATURES = [f for f in FEATURES if f not in BOUNDED_FEATURES]
+FEATURES = ['X_Minimum', 'X_Maximum', 'Y_Minimum', 'Y_Maximum', 'Pixels_Areas',
+            'X_Perimeter', 'Y_Perimeter', 'Sum_of_Luminosity', 'Minimum_of_Luminosity',
+            'Maximum_of_Luminosity', 'Length_of_Conveyer', 'Steel_Plate_Thickness',
+            'Edges_Index', 'Empty_Index', 'Square_Index', 'Outside_X_Index',
+            'Edges_X_Index', 'Edges_Y_Index', 'Outside_Global_Index', 'LogOfAreas',
+            'Log_X_Index', 'Log_Y_Index', 'Orientation_Index', 'Luminosity_Index',
+            'SigmoidOfAreas']
 
 MILD_K = 1.5
 EXTREME_K = 3.0
+VERY_EXTREME_K = 10.0
+SKEW_THRESHOLD = 5.0
 
 CHARTS_DIR = 'grafikai_isskirtys'
+CHARTS_DIR_SVARUS = 'grafikai_be_isskirciu'
 
 df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
@@ -95,11 +98,35 @@ def braizyti_grafika(data: pd.DataFrame, col: str, filename: str):
     plt.close(fig)
 
 
+def rasti_ilgauodegius_pozymius(data: pd.DataFrame):
+    skew_per_feature = {col: data[col].skew() for col in FEATURES}
+    ilgauodegiai = [col for col, skew in skew_per_feature.items() if abs(skew) > SKEW_THRESHOLD]
+    print('Ilgauodegiai požymiai (skew > {:.0f}): {}'.format(SKEW_THRESHOLD, ilgauodegiai))
+    return ilgauodegiai
+
+
+def virsija_griezta_tvora(part: pd.DataFrame, col: str):
+    q1, q3 = part[col].quantile([0.25, 0.75])
+    iqr = q3 - q1
+    zema, aukšta = q1 - VERY_EXTREME_K * iqr, q3 + VERY_EXTREME_K * iqr
+    return (part[col] < zema) | (part[col] > aukšta)
+
+
+def rasti_virsijancias_eilutes(data: pd.DataFrame, pozymiai: list):
+    virsija = pd.Series(False, index=data.index)
+
+    for col in pozymiai:
+        for kl in CLASSES:
+            part = data[data['class'] == kl]
+            mask = virsija_griezta_tvora(part, col)
+            virsija.loc[mask[mask].index] = True
+
+    return virsija
+
+
 def export_table_csv(table, filename):
     table.to_csv(filename + '.csv', index=False, float_format='%.4f')
 
-
-import os
 
 os.makedirs(CHARTS_DIR, exist_ok=True)
 
@@ -108,3 +135,15 @@ export_table_csv(ataskaita, 'isskirciu_ataskaita')
 
 for col in FEATURES:
     braizyti_grafika(df, col, os.path.join(CHARTS_DIR, f'{col}.png'))
+
+ilgauodegiai = rasti_ilgauodegius_pozymius(df)
+virsijancios_eilutes = rasti_virsijancias_eilutes(df, ilgauodegiai)
+print(f'Pašalinta eilučių (virš {VERY_EXTREME_K:.0f}xIQR tvoros ilgauodegiuose požymiuose): '
+      f'{virsijancios_eilutes.sum()} iš {len(df)}')
+
+df_svarus = df[~virsijancios_eilutes].reset_index(drop=True)
+df_svarus.to_csv('A27_be_virsutiniu_isskirciu.csv', index=False)
+
+os.makedirs(CHARTS_DIR_SVARUS, exist_ok=True)
+for col in FEATURES:
+    braizyti_grafika(df_svarus, col, os.path.join(CHARTS_DIR_SVARUS, f'{col}.png'))
