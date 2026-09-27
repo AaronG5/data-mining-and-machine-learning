@@ -7,7 +7,7 @@ df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
 df['class'] = df['class'].str.strip()
 
-poz = df.columns.drop('class')
+poz = df.columns.drop(['class', 'Outside_Global_Index'])
 iqr = df[poz].quantile(0.75) - df[poz].quantile(0.25)
 df[poz] = (df[poz] - df[poz].median()) / iqr.replace(0, 1)
 

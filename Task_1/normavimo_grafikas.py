@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Iš apačios į viršų: nuo ~1 iki ~10^7
-FEATURES = ['Edges_Index', 'Luminosity_Index', 'Steel_Plate_Thickness',
+FEATURES = ['LogOfAreas', 'Maximum_of_Luminosity', 'Steel_Plate_Thickness',
             'Pixels_Areas', 'Sum_of_Luminosity', 'Y_Minimum']
 
 pries = pd.read_csv('A27_be_virsutiniu_isskirciu.csv')[FEATURES]
