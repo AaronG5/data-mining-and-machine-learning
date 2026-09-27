@@ -20,7 +20,7 @@ def main():
    os.makedirs(OUT_DIR, exist_ok=True)
 
    rho = duomenys.corr(method='spearman')
-   rho.to_csv(os.path.join(OUT_DIR, 'koreliacija_spearman_visi.csv'), float_format='%.4f')
+   rho.to_csv(os.path.join(OUT_DIR, 'koreliacija_spearman_visi.csv'))
 
    p = pd.DataFrame(stats.spearmanr(duomenys)[1], index=rho.index, columns=rho.columns)
    p.to_csv(os.path.join(OUT_DIR, 'koreliacija_p_visi.csv'), float_format='%.3g')

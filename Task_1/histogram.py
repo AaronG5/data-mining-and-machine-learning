@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import os
 
-def plot_distribution(values: pd.Series, title: str, out_dir: str, class_name: str=None, save_as_png: bool=True, show: bool=False, bins=10, x_min: float=None, x_max: float=None) -> None:
+def plot_distribution(values: pd.Series, title: str, out_dir: str, class_name: str=None, save_as_png: bool=True, 
+                      show: bool=False, bins=10, x_min: float=None, x_max: float=None) -> None:
    values = pd.to_numeric(values, errors='coerce').dropna()
    mean = values.mean()
    q1, median, q3 = values.quantile([0.25, 0.5, 0.75])
