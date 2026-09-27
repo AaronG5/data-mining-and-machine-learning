@@ -1,16 +1,8 @@
 library(corrplot)
 
-FILE <- "../A27_be_virsutiniu_isskirciu.csv"
 OUT_DIR <- "../kor_rez"
 
-KLASĖS <- c("Bumps" = 0, "Other_Faults" = 1)
-
-df <- read.csv(FILE)
-
-duomenys <- df[, setdiff(names(df), "class")]
-duomenys$class <- KLASĖS[trimws(df$class)]
-
-rho <- cor(duomenys, method = "spearman")
+rho <- as.matrix(read.csv(file.path(OUT_DIR, "koreliacija_spearman_visi.csv"), row.names = 1, check.names = FALSE))
 
 dir.create(OUT_DIR, showWarnings = FALSE)
 
