@@ -2,13 +2,23 @@ import pandas as pd
 
 FILE = 'A27/A27.csv'
 CLASSES = ['Bumps', 'Other_Faults']
-FILL_FEATURES = ['Edges_Index', 'Luminosity_Index']
 MISSING_MARKERS = ['unknown', 'error', 'not_measured', '?']
 
 df = pd.read_csv(FILE, skipinitialspace=True)
 df.columns = df.columns.str.strip()
 df['class'] = df['class'].str.strip()
-df['Edges_Index'] = pd.to_numeric(df['Edges_Index'].replace(MISSING_MARKERS, pd.NA), errors='coerce')
+
+df['Steel_Plate_Thickness'] = pd.to_numeric(
+   df['Steel_Plate_Thickness'].astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
+
+FEATURES = [col for col in df.columns if col != 'class']
+
+for col in FEATURES:
+   df[col] = pd.to_numeric(df[col].replace(MISSING_MARKERS, pd.NA), errors='coerce')
+
+
+FILL_FEATURES = [col for col in FEATURES if df[col].isna().any()]
+print('Columns with missing values:', FILL_FEATURES)
 
 def uzpildyti_pagal_klase(part: pd.DataFrame, budas: str):
    filled = part.copy()
