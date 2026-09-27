@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 FILE = 'A27_medianos_pagal_klase.csv'
@@ -6,6 +7,7 @@ FEATURES = ['Log_X_Index', 'Log_Y_Index', 'Empty_Index', 'Square_Index', 'Length
              'Steel_Plate_Thickness', 'Edges_Index', 'Orientation_Index', 'LogOfAreas', 'Luminosity_Index']
 ZERO_ONE_FEATURES = ['Empty_Index', 'Square_Index', 'Edges_Index']
 POSITIVE_FEATURES = ['Length_of_Conveyer', 'Steel_Plate_Thickness']
+LOG_AREA_TOLERANCE = 1e-2 
 
 df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
@@ -22,6 +24,8 @@ def rasti_logines_klaidas(part: pd.DataFrame):
    for col in POSITIVE_FEATURES:
       klaidos |= part[col] <= 0
 
+   klaidos |= (part['Pixel_Areas'] <= 0) | ((part['LogOfAreas'] - np.log10(part['Pixel_Areas'].clip(lower=1e-9))).abs() > LOG_AREA_TOLERANCE)
+
    return klaidos
 
 def klaidu_ataskaita(part: pd.DataFrame):
@@ -37,6 +41,9 @@ def klaidu_ataskaita(part: pd.DataFrame):
    for col in POSITIVE_FEATURES:
       n = (part[col] <= 0).sum()
       rows.append({'Požymis': col, 'Taisyklė': '> 0', 'Pažeidimų': int(n)})
+
+   n = ((part['Pixel_Areas'] <= 0) | ((part['LogOfAreas'] - np.log10(part['Pixel_Areas'].clip(lower=1e-9))).abs() > LOG_AREA_TOLERANCE)).sum()
+   rows.append({'Požymis': 'LogOfAreas', 'Taisyklė': f'= log10(Pixel_Areas) (±{LOG_AREA_TOLERANCE})', 'Pažeidimų': int(n)})
 
    return pd.DataFrame(rows)
 
