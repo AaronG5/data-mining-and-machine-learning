@@ -34,19 +34,28 @@ def export_table_csv(table: pd.DataFrame, file_path: str) -> None:
 
 def main():
    os.makedirs(OUT_DIR, exist_ok=True)
-   FILE = os.path.join(BASE_DIR, 'A27', 'A27.csv') 
+   FILE_UNCLEAN = os.path.join(BASE_DIR, 'A27', 'A27.csv') 
+   FILE_CLEAN = os.path.join(BASE_DIR, 'A27_be_virsutiniu_isskirciu.csv') 
 
-   df = pd.read_csv(FILE, skipinitialspace=True)
+   df_unclean = pd.read_csv(FILE_UNCLEAN, skipinitialspace=True)
+   df_unclean.columns = df_unclean.columns.str.strip()
+   df_unclean['class'] = df_unclean['class'].str.strip()
+   df_unclean['Steel_Plate_Thickness'] = pd.to_numeric(df_unclean['Steel_Plate_Thickness']
+                                 .astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
+
+   df = pd.read_csv(FILE_CLEAN, skipinitialspace=True)
    df.columns = df.columns.str.strip()
    df['class'] = df['class'].str.strip()
-   df['Steel_Plate_Thickness'] = pd.to_numeric(df['Steel_Plate_Thickness']
-                                 .astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
 
    FEATURES = [col for col in df.columns if col != 'class']
    FEATURES_PICKED = ['Log_X_Index', 'Log_Y_Index', 'Empty_Index', 'Square_Index', 'Length_of_Conveyer',
                'Steel_Plate_Thickness', 'Edges_Index', 'Orientation_Index', 'LogOfAreas', 'Luminosity_Index']
+   
+   file_path = os.path.join(OUT_DIR, 'bendra_unclean_aprasomoji_statistika')
+   table = descriptive_statistics(df_unclean, FEATURES)
+   export_table_csv(table, file_path)
 
-   file_path = os.path.join(OUT_DIR, 'Bendra_aprasomoji_statistika')
+   file_path = os.path.join(OUT_DIR, 'bendra_clean_aprasomoji_statistika')
    table = descriptive_statistics(df, FEATURES)
    export_table_csv(table, file_path)
 
@@ -55,7 +64,7 @@ def main():
          pd.to_numeric(df[feature], errors='coerce').min(),
          pd.to_numeric(df[feature], errors='coerce').max()
       )
-      for feature in FEATURES
+      for feature in FEATURES_PICKED
    }
 
    # Atskirai pagal klases generuojami grafikai bei lentelės su atrinktais požymiais
@@ -63,7 +72,7 @@ def main():
       file_path = os.path.join(OUT_DIR, class_name + '_aprasomoji_statistika')
       part = df[df['class'] == class_name]
 
-      table = descriptive_statistics(part, FEATURES_PICKED)
+      table = descriptive_statistics(part, FEATURES)
       export_table_csv(table, file_path)
 
       directory = os.path.join(OUT_DIR, class_name)
