@@ -1,6 +1,6 @@
 import pandas as pd
 
-FILE = 'A27/A27.csv'
+FILE = 'A27/A27_be_dublikatu.csv'
 CLASSES = ['Bumps', 'Other_Faults']
 MISSING_MARKERS = ['unknown', 'error', 'not_measured', '?']
 
