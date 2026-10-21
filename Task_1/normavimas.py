@@ -1,7 +1,7 @@
 import pandas as pd
 
-FILE = 'A27_be_virsutiniu_isskirciu.csv'
-OUT_FILE = 'A27_normuota_robust.csv'
+FILE = 'A27_be_loginiu_klaidu.csv'
+OUT_FILE = 'A27_normuota_su_isskirtim_robust.csv'
 
 df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
