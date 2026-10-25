@@ -5,11 +5,11 @@ from scipy.spatial.distance import pdist
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
 
-KORELIUOTI = ["X_Minimum", "Y_Minimum", "Pixels_Areas", "LogOfAreas", "SigmoidOfAreas", "Log_X_Index", "Log_Y_Index", "Minimum_of_Luminosity"]
-pradine = pd.read_csv("A27_normuota_su_isskirtim_robust.csv") # 1059, su išskirtimis
-be_iss = pd.read_csv("A27_normuota_robust.csv") # 1019, be išskirčių
+#B aibėje pašalinti koreliuoti požymiai: X_Minimum, Y_Minimum, Pixels_Areas, LogOfAreas, SigmoidOfAreas, Log_X_Index, Log_Y_Index, Minimum_of_Luminosity
+pradine = pd.read_csv("A_originali_aibe.csv") # 1059, su išskirtimis
+be_iss = pd.read_csv("C_be_isskirciu.csv") # 1019, be išskirčių
 X = pradine.drop(columns="class").values #A: pradinė aibė
-X_B = pradine.drop(columns=["class"] + KORELIUOTI).values #B: be koreliuotų požymių (1059)
+X_B = pd.read_csv("B_be_koreliuotu.csv").drop(columns="class").values #B: be koreliuotų požymių (1059)
 X_C = be_iss.drop(columns="class").values #C: be išskirčių (1019)
 bendri = pd.read_csv("../Task_1/A27_be_loginiu_klaidu.csv").merge(
     pd.read_csv("../Task_1/A27_be_virsutiniu_isskirciu.csv"), how="left", indicator=True)["_merge"].eq("both").values
@@ -51,7 +51,7 @@ def diagrama(Z, klase, pavadinimas, failas):
     plt.legend(sc.legend_elements()[0], y.cat.categories)
     plt.savefig(failas, dpi=150); plt.close()
 
-# A: pradinė aibė (su išskirtimis)
+# A: pradinė aibė (su išskirtimis ir koreliuotais pož.)
 diagrama(Z_A, pradine["class"], "t-SNE: pradinė aibė", "tsne_A_pradine.png")
 
 # B: be koreliuotų požymių
