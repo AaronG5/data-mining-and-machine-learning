@@ -12,6 +12,7 @@ FEATURES = ['X_Minimum', 'X_Maximum', 'Y_Minimum', 'Y_Maximum', 'Pixels_Areas',
             'Log_X_Index', 'Log_Y_Index', 'Orientation_Index', 'Luminosity_Index',
             'SigmoidOfAreas']
 
+# intervalo ribos kiekvienam požymiui
 RANGE_RULES = {
    'X_Minimum': (0, None),
    'X_Maximum': (0, None),
@@ -47,6 +48,7 @@ df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
 df['class'] = df['class'].str.strip()
 
+# suranda įrašus, kurių požymių reikšmės nepatenka į jų intervalų apribojimus
 def pazeidimai(part: pd.DataFrame, col: str):
    lower, upper = RANGE_RULES[col]
    klaidos = pd.Series(False, index=part.index)
@@ -58,6 +60,7 @@ def pazeidimai(part: pd.DataFrame, col: str):
 
    return klaidos
 
+# suranda požymius, kurių tarpusavio ryšys yra nelogiškas
 def rysio_pazeidimai(part: pd.DataFrame):
    klaidos = pd.Series(False, index=part.index)
    klaidos |= part['X_Minimum'] > part['X_Maximum']
@@ -66,6 +69,7 @@ def rysio_pazeidimai(part: pd.DataFrame):
    klaidos |= ((part['LogOfAreas'] - np.log10(part['Pixels_Areas'].clip(lower=1e-9))).abs() > LOG_AREA_TOLERANCE)
    return klaidos
 
+# suranda ir grąžina logines klaidas
 def rasti_logines_klaidas(part: pd.DataFrame):
    klaidos = pd.Series(False, index=part.index)
 
@@ -76,6 +80,7 @@ def rasti_logines_klaidas(part: pd.DataFrame):
 
    return klaidos
 
+# pateikia surastų klaidų ataskaita
 def klaidu_ataskaita(part: pd.DataFrame):
    rows = []
 
@@ -106,5 +111,6 @@ print(ataskaita)
 klaidingos_eilutes = rasti_logines_klaidas(df)
 print(f'\nEilučių su logine klaida: {klaidingos_eilutes.sum()} iš {len(df)}')
 
+# išsaugo duomenų aibę be klaidingų reikšmių
 df_svarus = df[~klaidingos_eilutes].reset_index(drop=True)
 df_svarus.to_csv('A27_be_loginiu_klaidu.csv', index=False)

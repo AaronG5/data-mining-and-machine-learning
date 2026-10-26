@@ -12,14 +12,14 @@ df['Steel_Plate_Thickness'] = pd.to_numeric(
    df['Steel_Plate_Thickness'].astype(str).str.replace('mm', '', regex=False).str.strip(), errors='coerce')
 
 FEATURES = [col for col in df.columns if col != 'class']
-
+# anksčiau nurodytas reikšmes pakeičia su standartizuota "Not Available" reikšme
 for col in FEATURES:
    df[col] = pd.to_numeric(df[col].replace(MISSING_MARKERS, pd.NA), errors='coerce')
 
 
 FILL_FEATURES = [col for col in FEATURES if df[col].isna().any()]
-print('Columns with missing values:', FILL_FEATURES)
 
+# užpildo trūkstamas reikšmes su vidurkiu arba mediana pagal klasę
 def uzpildyti_pagal_klase(part: pd.DataFrame, budas: str):
    filled = part.copy()
 
@@ -31,6 +31,7 @@ def uzpildyti_pagal_klase(part: pd.DataFrame, budas: str):
 
    return filled
 
+# pateikia pokyčių statistiką po analizės
 def klasiu_statistika(originalas: pd.DataFrame, vidurkiu: pd.DataFrame, mediana: pd.DataFrame):
    rows = []
 
@@ -57,6 +58,7 @@ def klasiu_statistika(originalas: pd.DataFrame, vidurkiu: pd.DataFrame, mediana:
 
    return pd.DataFrame(rows)
 
+# eksportuoja ataskaitą į csv failą
 def export_table_csv(table, filename):
    table.to_csv(filename + '.csv', index=False, float_format='%.4f')
 
@@ -67,5 +69,6 @@ filename = 'uzpildymas_pagal_klase'
 table = klasiu_statistika(df, df_vidurkiu, df_mediana)
 export_table_csv(table, filename)
 
+# užpildytą aibę eksportuoja į CSV
 df_vidurkiu.to_csv('A27_vidurkiu_pagal_klase.csv', index=False)
 df_mediana.to_csv('A27_medianos_pagal_klase.csv', index=False)
