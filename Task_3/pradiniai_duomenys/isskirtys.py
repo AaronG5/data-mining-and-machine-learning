@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-FILE = 'A27_be_loginiu_klaidu.csv'
-CLASSES = ['Bumps', 'Other_Faults']
+FILE = 'steel_plates_full.csv'
+CLASSES = ['K_Scatch', 'Z_Scratch', 'Bumps']
 
 FEATURES = ['X_Minimum', 'X_Maximum', 'Y_Minimum', 'Y_Maximum', 'Pixels_Areas',
             'X_Perimeter', 'Y_Perimeter', 'Sum_of_Luminosity', 'Minimum_of_Luminosity',
@@ -142,7 +142,7 @@ print(f'Pašalinta eilučių (virš {VERY_EXTREME_K:.0f}xIQR tvoros ilgauodegiuo
       f'{virsijancios_eilutes.sum()} iš {len(df)}')
 
 df_svarus = df[~virsijancios_eilutes].reset_index(drop=True)
-df_svarus.to_csv('A27_be_virsutiniu_isskirciu.csv', index=False)
+df_svarus.to_csv('steel_plates_full_be_virsutiniu_isskirciu.csv', index=False)
 
 os.makedirs(CHARTS_DIR_SVARUS, exist_ok=True)
 for col in FEATURES:
