@@ -1,8 +1,9 @@
 import pandas as pd
 
-FILE = '../steel_plates_3_klases_su_koreliuotais.csv'
+FILE = '../apdoroti_duomenys/steel_plates_3_klases_su_koreliuotais.csv'
 ATASKAITA = '../pradiniai_duomenys/kor_rez/koreliacijos_ataskaita_3kl.csv'
-OUT_FILE = 'steel_plates_3_klases_normuota_robust.csv'
+OUT_FILE = '../apdoroti_duomenys/steel_plates_3_klases_normuota_robust.csv'
+OUT_NENORMUOTA = '../apdoroti_duomenys/steel_plates_3_klases_be_koreliuotu_nenormuota.csv'
 
 df = pd.read_csv(FILE)
 df.columns = df.columns.str.strip()
@@ -18,6 +19,9 @@ for a, b in zip(ataskaita['Požymis_1'], ataskaita['Požymis_2']):
 
 df = df.drop(columns=pasalinti)
 print(f'Pašalinti požymiai ({len(pasalinti)}): {pasalinti}')
+
+# nenormuota versija – klasterių aprašomosioms statistikoms originaliais vienetais
+df.to_csv(OUT_NENORMUOTA, index=False)
 
 # robust normavimas (kaip Task_1/normavimas.py)
 poz = df.columns.drop(['class', 'Outside_Global_Index'])

@@ -44,7 +44,7 @@ FIG_SIZE = (7, 7)
 DPI = 200
 PADDING = 0.05 
 
-DATA_FILE = Path(__file__).parent.parent / "steel_plates_3_klases_normuota_robust.csv"
+DATA_FILE = Path(__file__).parent.parent.parent / "apdoroti_duomenys" / "steel_plates_3_klases_normuota_robust.csv"
 
 OUTPUT_ROOT = Path(__file__).parent / "res"
 

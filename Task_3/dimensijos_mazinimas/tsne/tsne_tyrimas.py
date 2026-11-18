@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 #aibė be išskirčių ir be koreliuotų požymių, robust normuota (965)
-duomenys = pd.read_csv("../steel_plates_3_klases_normuota_robust.csv")
+duomenys = pd.read_csv("../../apdoroti_duomenys/steel_plates_3_klases_normuota_robust.csv")
 X = duomenys.drop(columns="class").values
 
 #NHk
