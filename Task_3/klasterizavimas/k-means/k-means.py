@@ -15,18 +15,18 @@ init_data: pd.DataFrame = pd.read_csv(DATA_FILE, skipinitialspace=True)
 classes: pd.Series = init_data["class"]
 
 data: np.ndarray = init_data.drop(columns="class").to_numpy()
+tss: float = ((data - data.mean(axis=0)) ** 2).sum()
 
 def findElbow(k_empirical: int, n_init: int=10) -> None:
-   tss: np.float64 = ((data - data.mean(axis=0)) ** 2).sum()
-
    ks: range = range(1, k_empirical + 1)
-   wcss: list[int] = []
+   wcss: list[float] = []
 
    for k in ks:
-      model: KMeans = KMeans(n_clusters=k, n_init=n_init, random_state=STATE).fit(data)  # pyright: ignore[reportArgumentType]
+      model: KMeans = KMeans(n_clusters=k, n_init=n_init, random_state=STATE).fit(data) # pyright: ignore[reportArgumentType]
       wcss.append(model.inertia_)  # pyright: ignore[reportArgumentType]
-
-   explained: list[np.float64] = [100 * (1 - w / tss) for w in wcss]
+   
+   bcss: np.ndarray = tss - np.array(wcss) # Easier to calculate BCSS = TSS - WCSS instead of BCSS by itself
+   explained: list[float] = [100 * (b / tss) for b in bcss] 
 
    plt.plot(ks, explained, marker="o")
    plt.xlabel("k")
@@ -41,6 +41,16 @@ def findSilhouette(k_empirical: int, n_init: int=10) -> list[float]:
       scores.append(silhouette_score(data, labels))
 
    return scores
+
+def findCalinski(k: int, n_init: int=10) -> float:
+   model: KMeans = KMeans(n_clusters=k, n_init=n_init, random_state=STATE).fit(data) # pyright: ignore[reportArgumentType]
+   
+   wcss: float = np.sum(np.float(model.inertia_))
+   print(wcss)
+   bcss: float = tss - wcss
+   n: int = len(data)
+
+   return (bcss / (k - 1)) / (wcss / (n - k))
 
 def plotSilhouette(k:int, n_init: int=10) -> None:
    CLUSTER_COLORS: list[str] = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
