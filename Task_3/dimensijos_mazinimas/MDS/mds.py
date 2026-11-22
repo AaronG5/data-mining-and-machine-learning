@@ -7,7 +7,7 @@ from sklearn.manifold import MDS, trustworthiness
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
-FAILAS = "../steel_plates_3_klases_normuota_robust.csv"
+FAILAS = "../../apdoroti_duomenys/steel_plates_3_klases_normuota_robust.csv"
 KAIMYNAI = [5, 15, 50]
 
 
