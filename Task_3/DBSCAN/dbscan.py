@@ -1,13 +1,11 @@
-"""3. Pasirinktas DBSCAN variantas kiekvienoje erdvėje: matai, klasterių profiliai ir vizualizacija
-(PCA 2D ir UMAP 2D projekcijose)."""
+"""3. Pasirinktas DBSCAN variantas kiekvienoje erdvėje: matai, klasterių profiliai, vizualizacija."""
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from bendra import (ERDVES, ERDVIU_PAVADINIMAI, FAILAS_NENORMUOTA, ikelti, matai,
-                    pasirinktas_dbscan, rez_katalogas, visos_erdves)
+from bendra import (ERDVES, ERDVIU_PAVADINIMAI, PASIRINKTI, dbscan_kelio, ikelti, matai, normuoti,
+                    rez_katalogas, visos_erdves)
 
 X, kodai, klases = ikelti()
-X_orig, _, _ = ikelti(FAILAS_NENORMUOTA)
 erdves = visos_erdves(X)
 PROJEKCIJOS = {"PCA 2D": erdves["pca2"], "UMAP 2D": erdves["umap2"]}
 
@@ -23,7 +21,8 @@ def piesti(ax, Z, grupes, pavadinimas, asiu_vardas):
 
 for erdve in ERDVES:
     Xv, rez = erdves[erdve], rez_katalogas(erdve)
-    zymes, eps, ms = pasirinktas_dbscan(Xv, erdve)
+    ms = PASIRINKTI[erdve][0]
+    zymes, eps = dbscan_kelio(Xv, *PASIRINKTI[erdve])
     pavad = f"{ERDVIU_PAVADINIMAI[erdve]}: DBSCAN eps={eps:.3f}, min_samples={ms}"
 
     print(f"\n{'=' * 70}\n{pavad}")
@@ -33,12 +32,12 @@ for erdve in ERDVES:
     kryz.to_csv(f"{rez}/klasteriai_vs_klases.csv")
     print("\nKlasteriai vs tikrosios klasės:\n", kryz)
 
-    profilis = X.groupby(zymes).median().T
+    profilis = normuoti(X).groupby(zymes).median().T
     profilis.to_csv(f"{rez}/klasteriu_profiliai.csv")
-    X_orig.groupby(zymes).agg(["median", "mean", "std"]).T.to_csv(
+    X.groupby(zymes).agg(["median", "mean", "std"]).T.to_csv(
         f"{rez}/klasteriu_statistikos_originalios.csv")
     print("\nKlasterių medianos (originalūs vienetai):\n",
-          X_orig.groupby(zymes).median().T.round(3).to_string())
+          X.groupby(zymes).median().T.round(3).to_string())
 
     grupes = pd.Series(zymes).map(lambda k: "triukšmas" if k == -1 else f"klasteris {k}").values
     _, asys = plt.subplots(2, 2, figsize=(12, 10))

@@ -1,9 +1,8 @@
 """2. Kaip keičiasi DBSCAN rezultatai keičiant eps ir min_samples (kiekvienoje erdvėje)."""
 import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.cluster import DBSCAN
 
-from bendra import (ERDVES, ERDVIU_PAVADINIMAI, MIN_SAMPLES, ikelti, kelio_eps, matai,
+from bendra import (ERDVES, ERDVIU_PAVADINIMAI, MIN_SAMPLES, dbscan_kelio, ikelti, matai,
                     rez_katalogas, visos_erdves)
 
 EPS_DAUGIKLIAI = [0.6, 0.8, 1.0, 1.2, 1.5]  # eps tyrimas aplink kelio tašką
@@ -17,10 +16,9 @@ for erdve in ERDVES:
     Xv, rez = erdves[erdve], rez_katalogas(erdve)
     eksperimentai = []
     for ms in MIN_SAMPLES[erdve]:
-        eps_kelio = kelio_eps(Xv, ms)[2]
         for dg in EPS_DAUGIKLIAI:
-            zymes = DBSCAN(eps=eps_kelio * dg, min_samples=ms).fit_predict(Xv)
-            eksperimentai.append({"min_samples": ms, "eps daugiklis": dg, "eps": eps_kelio * dg,
+            zymes, eps = dbscan_kelio(Xv, ms, dg)
+            eksperimentai.append({"min_samples": ms, "eps daugiklis": dg, "eps": eps,
                                   **matai(Xv, zymes, kodai)})
 
     lentele = pd.DataFrame(eksperimentai)

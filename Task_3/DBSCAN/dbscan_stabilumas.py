@@ -1,23 +1,15 @@
-"""4. Klasterių stabilumas kiekvienoje erdvėje (3 užd. skaidrė „Stabilumo eksperimentas“):
-N kartų imama 80 % NEnormuotų duomenų (be ekstremalių išskirčių ir koreliuotų požymių).
-Kiekviena imtis atskirai normuojama (robust), jai iš naujo skaičiuojama projekcija (PCA / UMAP,
-random_state = imties nr.) ir kelio eps, tada klasterizuojama. Visų N·(N−1)/2 imčių porų
-suskirstymai lyginami tik bendriems objektams (ARI, NMI, Jaccard) – tikrinamas visos procedūros
-(normavimas -> projekcija -> eps parinkimas -> DBSCAN) stabilumas.
-Pateikiama: išoriniai matai vidurkis ± SN ir min, vidiniai matai (Silhouette, CH, DB) vidurkis ± SN
-per N imčių, boxplot ir imčių skaičiaus pakankamumas (ARI vidurkis, kai N = 5, 10, 15, 20)."""
+"""4. Stabilumas: N imčių po 80 %, kiekviena atskirai normuojama, projektuojama ir klasterizuojama;
+imčių poros lyginamos bendriems objektams. Taip pat imčių skaičiaus pakankamumas (N = 5…20)."""
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from bendra import (ERDVES, ERDVIU_PAVADINIMAI, FAILAS_NENORMUOTA, PASIRINKTI, ikelti, imtys,
-                    rez_katalogas, stabilumas)
+from bendra import (ERDVES, ERDVIU_PAVADINIMAI, PASIRINKTI, ikelti, imtys, rez_katalogas,
+                    stabilumas)
 
 N = 20                         # skaidrėje rekomenduojama N = 10–20
 N_TIKRINIMUI = [5, 10, 15, 20]  # pakankamumas: ar ARI vidurkis nusistovi
 DALIS = 0.8
-# (min_samples, eps daugiklis): pasirinktas variantas (pirmas) ir keli palyginimui.
-# eps = kiekvienos imties kelio eps × daugiklis (projekcija perskaičiuojama, todėl visų duomenų
-# eps tiesiogiai netinka).
+# (min_samples, eps daugiklis); pirmas – pasirinktas, eps = imties kelio eps × daugiklis
 VARIANTAI = {
     "originali": [PASIRINKTI["originali"], (5, 0.8), (10, 1.0), (32, 0.6)],
     "pca5": [PASIRINKTI["pca5"], (5, 1.0), (16, 1.2), (32, 0.6)],
@@ -28,7 +20,7 @@ VARIANTAI = {
 ISORINIAI = ["ARI", "NMI", "Jaccard"]
 VIDINIAI = ["eps", "klasteriai", "triukšmas %", "Silhouette", "Calinski-Harabasz", "Davies-Bouldin"]
 
-X_nenorm, _, _ = ikelti(FAILAS_NENORMUOTA)
+X_nenorm, _, _ = ikelti()
 imciu_sarasas = imtys(len(X_nenorm), N, DALIS)
 pd.set_option("display.width", 250)
 pd.set_option("display.max_columns", None)
@@ -77,7 +69,6 @@ for erdve in ERDVES:
     plt.savefig(f"{rez}/stabilumas.png", dpi=150)
     plt.close()
 
-# Imčių skaičiaus pakankamumas: pasirinkto varianto ARI vidurkis didinant N
 pakankamumas = pd.DataFrame(pakankamumas)
 rez = rez_katalogas("palyginimas")
 pakankamumas.to_csv(f"{rez}/imciu_skaiciaus_pakankamumas.csv", index=False)
