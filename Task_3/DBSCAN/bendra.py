@@ -1,10 +1,13 @@
 """Bendros funkcijos: duomenų įkėlimas, klasterizavimo erdvės (originali / PCA / UMAP),
 kelio (knee) eps paieška, pasirinktas DBSCAN variantas ir kokybės matai.
 
-Erdvės (3 užd. 17 skaidrė: geriausias 2 užd. metodas + PCA kaip globali atskaita):
+Erdvės (3 užd. 17–18 skaidrės: geriausias 2 užd. metodas + PCA kaip globali atskaita,
+kiekvienas dviem dimensijomis):
   originali – 16 normuotų požymių (atskaitos suskirstymas),
-  pca       – globalus metodas, komponentės išlaikančios ≥ 80 % dispersijos,
-  umap      – lokalus metodas, geriausias 2 užduotyje (tie patys parametrai)."""
+  pca5      – globalus metodas, 5 komponentės (87,9 % dispersijos; tiek pat dimensijų kaip UMAP 5D),
+  pca2      – PCA 2 komponentės (68,5 % dispersijos),
+  umap5     – lokalus metodas, geriausias 2 užduotyje, 5 komponentės,
+  umap2     – tas pats UMAP, 2 komponentės (kaip 2 užduotyje)."""
 import os
 import warnings
 
@@ -25,25 +28,30 @@ FAILAS = "../apdoroti_duomenys/steel_plates_3_klases_normuota_robust.csv"
 FAILAS_NENORMUOTA = "../apdoroti_duomenys/steel_plates_3_klases_be_koreliuotu_nenormuota.csv"
 
 RANDOM_STATE = 42
-ERDVES = ["originali", "pca", "umap"]
-PCA_DISPERSIJA = 0.80  # → 4 komponentės (83,7 %)
-# Tie patys UMAP parametrai kaip ../dimensijos_mazinimas/UMAP/umap_tyrimas.py
-UMAP_PARAMETRAI = dict(n_neighbors=25, min_dist=0.05, n_components=2, metric="euclidean")
+ERDVES = ["originali", "pca5", "pca2", "umap5", "umap2"]
+PCA_KOMPONENTES = 5  # 87,9 % dispersijos, kaip UMAP 5D – vienodas dimensijų skaičius palyginimui
+# Tie patys UMAP parametrai kaip ../dimensijos_mazinimas/UMAP/umap_tyrimas.py (keičiamas tik n_components)
+UMAP_PARAMETRAI = dict(n_neighbors=25, min_dist=0.05, metric="euclidean")
 
 # Tiriami min_samples kiekvienai erdvei (Sander et al.: min_samples ≈ 2·D)
 MIN_SAMPLES = {
     "originali": [5, 10, 16, 32],  # D=16
-    "pca": [4, 8, 16, 32],         # D=4
-    "umap": [4, 10, 25, 50],       # D=2
+    "pca5": [5, 10, 16, 32],       # D=5
+    "pca2": [4, 10, 25, 50],       # D=2
+    "umap5": [5, 10, 25, 50],      # D=5
+    "umap2": [4, 10, 25, 50],      # D=2
 }
 # Pasirinktas variantas kiekvienai erdvei: (min_samples, eps daugiklis kelio eps atžvilgiu).
 # Pagrindimas – dbscan_eksperimentai.py ir dbscan_stabilumas.py rezultatai.
 PASIRINKTI = {
     "originali": (5, 1.0),
-    "pca": (8, 1.0),
-    "umap": (25, 1.0),
+    "pca5": (10, 1.0),
+    "pca2": (10, 1.0),
+    "umap5": (25, 1.0),
+    "umap2": (25, 1.0),
 }
-ERDVIU_PAVADINIMAI = {"originali": "Originali (16D)", "pca": "PCA (4D)", "umap": "UMAP (2D)"}
+ERDVIU_PAVADINIMAI = {"originali": "Originali (16D)", "pca5": "PCA (5D)", "pca2": "PCA (2D)",
+                      "umap5": "UMAP (5D)", "umap2": "UMAP (2D)"}
 
 
 def rez_katalogas(erdve):
@@ -58,20 +66,40 @@ def ikelti(failas=FAILAS):
     return duomenys.drop(columns="class"), klase.cat.codes.values, klase.cat.categories
 
 
+# --- Normavimas ir erdvės ---
+def normuoti(df):
+    """Robust normavimas kaip ../dimensijos_mazinimas/paruosimas.py: (x - mediana) / IQR
+    (IQR = 0 -> 1); Outside_Global_Index nenormuojamas. Statistikos – tik iš pateiktų eilučių."""
+    df = df.copy()
+    poz = df.columns.drop("Outside_Global_Index", errors="ignore")
+    iqr = df[poz].quantile(0.75) - df[poz].quantile(0.25)
+    df[poz] = (df[poz] - df[poz].median()) / iqr.replace(0, 1)
+    return df
+
+
 # --- Erdvės -----------------------------------------------------------------
-def pca_projekcija(X, n_components=PCA_DISPERSIJA):
-    return PCA(n_components=n_components, random_state=RANDOM_STATE).fit_transform(X)
+def pca_projekcija(X, n_components=PCA_KOMPONENTES, random_state=RANDOM_STATE):
+    return PCA(n_components=n_components, random_state=random_state).fit_transform(X)
 
 
-def umap_projekcija(X):
+def umap_projekcija(X, n_components=2, random_state=RANDOM_STATE):
     warnings.filterwarnings("ignore", message="n_jobs value .* overridden")
-    return umap.UMAP(random_state=RANDOM_STATE, compatibility_layout=True,
-                     **UMAP_PARAMETRAI).fit_transform(X)
+    return umap.UMAP(n_components=n_components, random_state=random_state,
+                     compatibility_layout=True, **UMAP_PARAMETRAI).fit_transform(X)
+
+
+def erdves_matrica(X, erdve, random_state=RANDOM_STATE):
+    """Normuotų duomenų matrica toje erdvėje, kurioje vykdomas DBSCAN."""
+    if erdve == "originali":
+        return np.asarray(X)
+    metodas, d = erdve[:-1], int(erdve[-1])
+    projekcija = pca_projekcija if metodas == "pca" else umap_projekcija
+    return projekcija(X, d, random_state=random_state)
 
 
 def visos_erdves(X):
     """{erdvė: matrica, kurioje vykdomas DBSCAN}."""
-    return {"originali": np.asarray(X), "pca": pca_projekcija(X), "umap": umap_projekcija(X)}
+    return {erdve: erdves_matrica(X, erdve) for erdve in ERDVES}
 
 
 # --- Kelio metodas ir DBSCAN ------------------------------------------------
@@ -104,33 +132,46 @@ def isoriniai(a, b, priesaga=""):
             f"NMI{priesaga}": normalized_mutual_info_score(a, b)}
 
 
-def imtys(n, kiekis=50, dalis=0.8):
-    """`kiekis` atsitiktinių imčių po `dalis` objektų (be grąžinimo), fiksuotas RANDOM_STATE."""
-    rng = np.random.default_rng(RANDOM_STATE)
-    return [np.sort(rng.choice(n, int(dalis * n), replace=False)) for _ in range(kiekis)]
+def imtys(n, kiekis=20, dalis=0.8):
+    """`kiekis` atsitiktinių imčių po `dalis` objektų (be grąžinimo). Imtis i traukiama su
+    random_state = i (0, 1, …, N−1): skirtingos, bet užfiksuotos – rezultatai atkartojami."""
+    return [np.sort(np.random.default_rng(i).choice(n, int(dalis * n), replace=False))
+            for i in range(kiekis)]
 
 
-def stabilumas(Xv, eps, min_samples, imciu_sarasas):
-    """Kiekviena imtis klasterizuojama tais pačiais parametrais; visų imčių poros lyginamos
-    tik bendriems objektams. Triukšmas (-1) – atskira grupė, todėl perėjimas
-    klasteris <-> triukšmas laikomas nestabilumu.
-    Grąžina (porų matų lentelė, klasterių skaičius kiekvienoje imtyje)."""
-    zymes = np.full((len(imciu_sarasas), len(Xv)), np.nan)
-    klasteriu_sk = []
+def stabilumas(X_nenorm, erdve, variantai, imciu_sarasas):
+    """Stabilumas, kai kiekviena imtis apdorojama nuo pradžių: imama iš NEnormuotų duomenų,
+    normuojama (robust) tik pagal tos imties statistikas, jai iš naujo skaičiuojama projekcija
+    (PCA / UMAP) ir kelio eps; tada DBSCAN. Taip į imtį nepatenka informacija iš likusių 20 %.
+    Visų imčių poros lyginamos tik bendriems objektams. Triukšmas (-1) – atskira grupė, todėl
+    perėjimas klasteris <-> triukšmas laikomas nestabilumu.
+    variantai – [(min_samples, eps daugiklis), ...].
+    Imčiai i projekcijos random_state = i.
+    Grąžina {variantas: (porų matų lentelė su imčių indeksais i, j;
+                         imčių lentelė: eps, klasteriai, triukšmas %, Silhouette, CH, DB)}."""
+    X_nenorm = pd.DataFrame(X_nenorm).reset_index(drop=True)
+    zymes = {v: np.full((len(imciu_sarasas), len(X_nenorm)), np.nan) for v in variantai}
+    imciu_eilutes = {v: [] for v in variantai}
     for i, idx in enumerate(imciu_sarasas):
-        zymes[i, idx] = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(Xv[idx])
-        klasteriu_sk.append(len(set(zymes[i, idx]) - {-1}))
-    poros = []
-    for i in range(len(zymes)):
-        for j in range(i + 1, len(zymes)):
-            bendri = ~np.isnan(zymes[i]) & ~np.isnan(zymes[j])
-            poros.append(isoriniai(zymes[i, bendri], zymes[j, bendri]))
-    return pd.DataFrame(poros), klasteriu_sk
+        Xv = erdves_matrica(normuoti(X_nenorm.iloc[idx]), erdve, random_state=i)
+        for ms, dg in variantai:
+            eps = kelio_eps(Xv, ms)[2] * dg
+            z = DBSCAN(eps=eps, min_samples=ms).fit_predict(Xv)
+            zymes[(ms, dg)][i, idx] = z
+            imciu_eilutes[(ms, dg)].append({"imtis": i, "eps": eps, **vidiniai(Xv, z)})
+    rez = {}
+    for v, z in zymes.items():
+        poros = []
+        for i in range(len(z)):
+            for j in range(i + 1, len(z)):
+                bendri = ~np.isnan(z[i]) & ~np.isnan(z[j])
+                poros.append({"i": i, "j": j, **isoriniai(z[i, bendri], z[j, bendri])})
+        rez[v] = (pd.DataFrame(poros), pd.DataFrame(imciu_eilutes[v]))
+    return rez
 
 
-def matai(X, zymes, tikros):
-    """Vidiniai matai skaičiuojami be triukšmo taškų (-1 nėra klasteris).
-    Išoriniai – visiems objektams, triukšmą laikant atskira grupe."""
+def vidiniai(X, zymes):
+    """Klasterių sk., triukšmas ir vidiniai matai (be triukšmo taškų: -1 nėra klasteris)."""
     be_triuksmo = zymes != -1
     n_klast = len(set(zymes[be_triuksmo]))
     rez = {
@@ -145,4 +186,10 @@ def matai(X, zymes, tikros):
         rez["Davies-Bouldin"] = davies_bouldin_score(Xk, zk)
     else:
         rez["Silhouette"] = rez["Calinski-Harabasz"] = rez["Davies-Bouldin"] = np.nan
-    return {**rez, **isoriniai(tikros, zymes)}
+    return rez
+
+
+def matai(X, zymes, tikros):
+    """Vidiniai matai – be triukšmo taškų; išoriniai – visiems objektams, triukšmą laikant
+    atskira grupe."""
+    return {**vidiniai(X, zymes), **isoriniai(tikros, zymes)}

@@ -25,7 +25,7 @@ def main():
    p = pd.DataFrame(stats.spearmanr(duomenys)[1], index=rho.index, columns=rho.columns)
    p.to_csv(os.path.join(OUT_DIR, 'koreliacija_p_3kl.csv'), float_format='%.3g')
 
-   # požymių poros su |rho| >= 0.9 (be klasių stulpelių)
+   #požymių poros su rho >= 0.9
    pozymiai = df.drop(columns='class').columns
    rows = []
    for i, a in enumerate(pozymiai):

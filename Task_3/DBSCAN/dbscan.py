@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from bendra import (ERDVES, ERDVIU_PAVADINIMAI, FAILAS_NENORMUOTA, ikelti, matai,
-                    pasirinktas_dbscan, pca_projekcija, rez_katalogas, umap_projekcija,
-                    visos_erdves)
+                    pasirinktas_dbscan, rez_katalogas, visos_erdves)
 
 X, kodai, klases = ikelti()
 X_orig, _, _ = ikelti(FAILAS_NENORMUOTA)
 erdves = visos_erdves(X)
-PROJEKCIJOS = {"PCA 2D": pca_projekcija(X, 2), "UMAP 2D": umap_projekcija(X)}
+PROJEKCIJOS = {"PCA 2D": erdves["pca2"], "UMAP 2D": erdves["umap2"]}
 
 
 def piesti(ax, Z, grupes, pavadinimas, asiu_vardas):
