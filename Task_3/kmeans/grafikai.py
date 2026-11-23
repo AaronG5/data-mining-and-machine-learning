@@ -19,22 +19,25 @@ def piesti(ax, Z, zymes, pavadinimas, asiu_vardas, vardai=None):
          Z[m, 0], Z[m, 1], s=8, alpha=0.7, color=spalva(z), label=vardai[z] if vardai is not None else f"klasteris {z}"
       )
    ax.set(title=pavadinimas, xlabel=f"{asiu_vardas} 1", ylabel=f"{asiu_vardas} 2")
+   ax.set_box_aspect(1)
    ax.legend(markerscale=2, fontsize=8)
 
 
-def k_kreives(ax_alk, ax_sil, lentele, metodu_k, k_pasirinktas):
+def k_kreive_grafikas(ax, lentele, stulp, k_metodo, k_pasirinktas, pavadinimas, ylab):
    """Raudonas taškas - metodo siūlomas k, pilka linija - pasirinktas k."""
-   for ax, stulp, ylab, pav in [
-      (ax_alk, "WCSS", "WCSS", "Elbow metodas"),
-      (ax_sil, "Silhouette", "Vidutinis silueto koeficientas", "Vidutinio silueto metodas"),
-   ]:
-      k = metodu_k[stulp if stulp == "Silhouette" else "Elbow"]
-      ax.plot(lentele["k"], lentele[stulp], marker="o", lw=1.2)
-      ax.scatter([k], lentele.loc[lentele["k"] == k, stulp], c="red", s=60, zorder=3, label=f"metodo siūlomas k = {k}")
-      ax.axvline(k_pasirinktas, ls="--", c="grey", lw=1, label=f"pasirinktas k = {k_pasirinktas}")
-      ax.set(title=pav, xlabel="Klasterių skaičius k", ylabel=ylab, xticks=lentele["k"])
-      ax.grid(alpha=0.3)
-      ax.legend(fontsize=8)
+   ax.plot(lentele["k"], lentele[stulp], marker="o", lw=1.2)
+   ax.scatter(
+      [k_metodo],
+      lentele.loc[lentele["k"] == k_metodo, stulp],
+      c="red",
+      s=60,
+      zorder=3,
+      label=f"metodo siūlomas k = {k_metodo}",
+   )
+   ax.axvline(k_pasirinktas, ls="--", c="grey", lw=1, label=f"pasirinktas k = {k_pasirinktas}")
+   ax.set(title=pavadinimas, xlabel="Klasterių skaičius k", ylabel=ylab, xticks=lentele["k"])
+   ax.grid(alpha=0.3)
+   ax.legend(fontsize=8)
 
 
 def silueto_grafikas(ax, X, zymes, pavadinimas):

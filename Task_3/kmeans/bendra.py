@@ -13,12 +13,12 @@ from sklearn.preprocessing import normalize
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from erdves import RANDOM_STATE
+from erdves import ERDVIU_PAVADINIMAI, RANDOM_STATE
 
 REZ = Path(__file__).resolve().parent / "res"
 ZINGSNIAI = {1: "1_k_selection", 2: "2_original", 3: "3_reduced", 4: "4_stability", 5: "5_results"}
 
-TVARKA = ["originali", "pca2", "pca5", "umap2", "umap5"]
+TVARKA = ["originali", "pca5", "pca2", "umap5", "umap2"]
 SUMAZINTOS = TVARKA[1:]
 
 K_REIKSMES = list(range(2, 11))
@@ -54,6 +54,12 @@ def vid_sn(x):
 def parametrai_tekstu(erdve):
    atstumas, init, n_init = PASIRINKTI[erdve]
    return f"k={PASIRINKTAS_K[erdve]}, {atstumas}, init={init}, n_init={n_init}"
+
+
+def kmeans_antraste(erdve):
+   """Grafiko antraštė, pvz. "k-means UMAP (5D)" ir naujoje eilutėje "k=5, init=k-means++, n_init=20"."""
+   _, init, n_init = PASIRINKTI[erdve]
+   return f"k-means {ERDVIU_PAVADINIMAI[erdve]}\nk={PASIRINKTAS_K[erdve]}, init={init}, n_init={n_init}"
 
 
 def issaugoti_zymes(kelias, zymes, kodai, klasiu_pavadinimai):

@@ -11,6 +11,7 @@ from bendra import (
    TVARKA,
    issaugoti_zymes,
    kmeans,
+   kmeans_antraste,
    parametrai_tekstu,
    perkelimo_lentele,
    rez_katalogas,
@@ -20,8 +21,8 @@ from bendra import (
    vid_sn,
 )
 from erdves import ERDVIU_PAVADINIMAI, ikelti, visos_erdves
-from grafikai import issaugoti, k_kreives, piesti, silueto_grafikas, spalva
-from k_parinkimas import k_kreive, k_lentele, metodu_k
+from grafikai import issaugoti, k_kreive_grafikas, piesti, silueto_grafikas, spalva
+from k_parinkimas import DISPERSIJA, k_kreive, k_lentele, metodu_k
 from matai import isoriniai, vidiniai
 from parametrai import parametru_lentele
 from stabilumas import imciu_pakankamumas, imtys, palyginti_imciu_poras, projektuoti_imtis
@@ -41,10 +42,22 @@ def zingsnis1(erdves):
    k_lentele(lentele, len(X)).to_csv(rez / "k_selection_original.csv", index=False)
    print(k_lentele(lentele, len(X)).to_string(index=False))
 
-   _, asys = plt.subplots(1, 2, figsize=(12, 4.5))
-   k_kreives(*asys, lentele, metodu_k(lentele, len(X)), PASIRINKTAS_K["originali"])  # pyright: ignore[reportCallIssue]
-   plt.suptitle(f"{ERDVIU_PAVADINIMAI['originali']}: optimalaus k parinkimas")
-   issaugoti(rez / "k_selection.png")
+   k_metodu = metodu_k(lentele, len(X))
+   for failas, metodas, stulp, pavadinimas, ylab in [
+      ("elbow.png", "Elbow", DISPERSIJA, "Elbow metodas", "Paaiškinta dispersija, %"),
+      ("silhouette_avg.png", "Silhouette", "Silhouette", "Vidutinio silueto metodas", "Vidutinis silueto koeficientas"),
+   ]:
+      _, ax = plt.subplots(figsize=(7, 4.5))
+      k_kreive_grafikas(
+         ax,
+         lentele,
+         stulp,
+         k_metodu[metodas],
+         PASIRINKTAS_K["originali"],
+         f"{ERDVIU_PAVADINIMAI['originali']}: {pavadinimas}",
+         ylab,
+      )
+      issaugoti(rez / failas)
 
    _, asys = plt.subplots(2, 2, figsize=(12, 10))
    for ax, k in zip(asys.ravel(), [2, 3, 4, 5]):
@@ -62,24 +75,53 @@ def zingsnis2(erdves, X_nenorm, kodai, klases):
    issaugoti_zymes(rez / "labels_ref_original.csv", labels_ref, kodai, klases)
    statistikos(X_nenorm, labels_ref).to_csv(rez / "statistics_original.csv")
 
-   _, asys = plt.subplots(2, 2, figsize=(12, 10))
-   for eil, proj in zip(asys, ["PCA", "UMAP"]):
+   # Originalios erdvės klasteriai PCA 2D ir UMAP 2D projekcijose (atskiri paveikslai)
+   for proj, failas in [("PCA", "projection_original.png"), ("UMAP", "projection_original_umap.png")]:
+      _, asys = plt.subplots(1, 2, figsize=(12, 6.3))
       Z = erdves[f"{proj.lower()}2"]
-      piesti(eil[0], Z, labels_ref, f"k-means klasteriai ({proj} 2D)", proj)
-      piesti(eil[1], Z, kodai, f"Tikrosios klasės ({proj} 2D)", proj, klases)
-   plt.suptitle(f"{ERDVIU_PAVADINIMAI['originali']}: k-means {parametrai_tekstu('originali')}")
-   issaugoti(rez / "projection_original.png")
+      piesti(asys[0], Z, labels_ref, kmeans_antraste("originali"), proj)
+      piesti(asys[1], Z, kodai, "Tikrosios klasės", proj, klases)
+      issaugoti(rez / failas)
+
+
+def k_parinkimas_erdvese(erdves, n, rez):
+   """k lentelė sumažintoms erdvėms ir Elbow bei vidutinio silueto grafikai visoms 5 erdvėms
+   (kiekvienas metodas atskirame paveiksle)."""
+   kreives = {e: k_kreive(erdves[e])[0] for e in TVARKA}
+   pd.concat(kreives[e].assign(erdvė=ERDVIU_PAVADINIMAI[e]) for e in SUMAZINTOS).to_csv(
+      rez / "k_selection_reduced.csv", index=False
+   )
+
+   for failas, metodas, stulp, pavadinimas, ylab in [
+      ("elbow_spaces.png", "Elbow", DISPERSIJA, "Elbow metodas", "Paaiškinta dispersija, %"),
+      (
+         "silhouette_spaces.png",
+         "Silhouette",
+         "Silhouette",
+         "Vidutinio silueto metodas",
+         "Vidutinis silueto koeficientas",
+      ),
+   ]:
+      _, asys = plt.subplots(1, len(TVARKA), figsize=(4.6 * len(TVARKA), 4.2))
+      for ax, erdve in zip(asys, TVARKA):
+         k_kreive_grafikas(
+            ax,
+            kreives[erdve],
+            stulp,
+            metodu_k(kreives[erdve], n)[metodas],
+            PASIRINKTAS_K[erdve],
+            ERDVIU_PAVADINIMAI[erdve],
+            ylab,
+         )
+      plt.suptitle(f"{pavadinimas} skirtingose erdvėse", fontweight="bold")
+      issaugoti(rez / failas)
 
 
 def zingsnis3(erdves, X_nenorm, kodai, klases):
    """3. k-means sumažintose erdvėse (PCA ir UMAP, 2D ir 5D). Reikia 2 žingsnio labels_ref."""
    rez = rez_katalogas(3)
    labels_ref = skaityti_labels_ref()
-
-   k_lenteles = [
-      k_lentele(k_kreive(erdves[e])[0], len(X_nenorm)).assign(erdvė=ERDVIU_PAVADINIMAI[e]) for e in SUMAZINTOS
-   ]
-   pd.concat(k_lenteles).to_csv(rez / "k_selection_reduced.csv", index=False)
+   k_parinkimas_erdvese(erdves, len(X_nenorm), rez)
 
    zymes = {"originali": labels_ref}
    for erdve in SUMAZINTOS:
@@ -95,12 +137,10 @@ def zingsnis3(erdves, X_nenorm, kodai, klases):
 
    for proj in ["PCA", "UMAP"]:
       Z = erdves[f"{proj.lower()}2"]
-      _, asys = plt.subplots(2, 2, figsize=(12, 10))
-      for ax, d in zip(asys[0], [2, 5]):
-         piesti(ax, Z, zymes[f"{proj.lower()}{d}"], f"k-means klasteriai, rasti {proj} {d}D", proj)
-      piesti(asys[1, 0], Z, labels_ref, "Originalios erdvės klasteriai (labels_ref)", proj)
-      piesti(asys[1, 1], Z, kodai, "Tikrosios klasės", proj, klases)
-      plt.suptitle(f"k-means {proj} erdvėse ({proj} 2D projekcija)")
+      _, asys = plt.subplots(1, 3, figsize=(18, 6.3))
+      for ax, d in zip(asys, [5, 2]):
+         piesti(ax, Z, zymes[f"{proj.lower()}{d}"], kmeans_antraste(f"{proj.lower()}{d}"), proj)
+      piesti(asys[2], Z, kodai, "Tikrosios klasės", proj, klases)
       issaugoti(rez / f"projection_{proj.lower()}.png")
 
    # Originali ir PCA rodomos PCA 2D projekcijoje, UMAP - UMAP 2D
@@ -162,10 +202,11 @@ def zingsnis4(X_nenorm):
    santrauka.to_csv(rez / "stability_metrics.csv", index=False)
    print(santrauka.to_string(index=False))
 
-   _, ax = plt.subplots(figsize=(8, 4.2))
-   ax.boxplot([p["ARI"] for p in poros.values()], tick_labels=list(poros), orientation="horizontal")
-   ax.set(title="k-means stabilumas: ARI tarp 20 × 80 % imčių porų (bendri objektai)", xlabel="ARI")
-   ax.grid(alpha=0.3, axis="x")
+   # Iš apačios į viršų: UMAP (2D), UMAP (5D), PCA (2D), PCA (5D), Originali (16D)
+   tvarka = [ERDVIU_PAVADINIMAI[e] for e in ["umap2", "umap5", "pca2", "pca5", "originali"]]
+   _, ax = plt.subplots(figsize=(8, 4.5))
+   ax.boxplot([poros[e]["ARI"] for e in tvarka], tick_labels=tvarka, orientation="horizontal")
+   ax.set(title="Stabilumas", xlabel="ARI tarp imčių porų")
    issaugoti(rez / "stability.png")
 
 
