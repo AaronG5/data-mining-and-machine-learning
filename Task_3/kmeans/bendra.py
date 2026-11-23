@@ -39,7 +39,7 @@ def rez_katalogas(zingsnis):
 def kmeans(X, k, atstumas="euclidean", init="k-means++", n_init=10, seed=RANDOM_STATE):
    """Grąžina (žymės, iteracijų sk.). Kosinusinis variantas: eilutės normuojamos iki vienetinio ilgio."""
    Xk = normalize(X) if atstumas == "cosine" else X
-   modelis = KMeans(n_clusters=k, init=init, n_init=n_init, random_state=seed).fit(Xk)
+   modelis = KMeans(n_clusters=k, init=init, n_init=n_init, random_state=seed).fit(Xk)  # pyright: ignore[reportArgumentType]
    return modelis.labels_, modelis.n_iter_
 
 
@@ -86,8 +86,8 @@ def sutapimo_lentele(ref, suderintos, atitikmenys):
    sutampa = np.array([atitikmenys[z] for z in suderintos]) == ref
    lentele = pd.Series(sutampa).groupby(ref).agg(objektu="size", sutampa="sum")
    lentele.loc["viso"] = lentele.sum()
-   lentele["skiriasi"] = lentele["objektu"] - lentele["sutampa"]
-   lentele["sutampa %"] = (100 * lentele["sutampa"] / lentele["objektu"]).round(2)
+   lentele["skiriasi"] = lentele["objektu"] - lentele["sutampa"]  # pyright: ignore[reportIndexIssue]
+   lentele["sutampa %"] = (100 * lentele["sutampa"] / lentele["objektu"]).round(2)  # pyright: ignore[reportIndexIssue]
    return lentele.rename_axis("originalus klasteris")
 
 

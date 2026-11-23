@@ -9,7 +9,6 @@ from sklearn.metrics import silhouette_samples
 
 
 def spalva(z):
-   # Tas pats klasterio numeris visada tos pačios spalvos
    return f"C{int(z) % 10}"
 
 
@@ -39,7 +38,7 @@ def k_kreives(ax_alk, ax_sil, lentele, metodu_k, k_pasirinktas):
 
 
 def silueto_grafikas(ax, X, zymes, pavadinimas):
-   reiksmes = silhouette_samples(X, zymes)
+   reiksmes = np.array(silhouette_samples(X, zymes))
    apacia = 10
    for z in np.unique(zymes):
       r = np.sort(reiksmes[zymes == z])
