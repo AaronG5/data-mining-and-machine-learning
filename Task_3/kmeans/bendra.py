@@ -97,14 +97,6 @@ def sutapimo_lentele(ref, suderintos, atitikmenys):
    return lentele.rename_axis("originalus klasteris")
 
 
-def perkelimo_lentele(ref, suderintos, sutapimas):
-   """Į kuriuos klasterius pateko originalių klasterių objektai ir kiek perkelta."""
-   lentele = pd.crosstab(pd.Series(ref, name="originalus klasteris"), pd.Series(suderintos, name="klasteris"))
-   lentele["perkelta"] = sutapimas["skiriasi"]
-   lentele["perkelta %"] = (100 - sutapimas["sutampa %"]).round(2)
-   return lentele
-
-
 def statistikos(X_nenorm, zymes):
    """Mediana, vidurkis, IQR ir SN originaliais vienetais: visai aibei ir kiekvienam klasteriui."""
    grupes = {"visi": X_nenorm, **{f"klasteris {z}": X_nenorm[zymes == z] for z in np.unique(zymes)}}

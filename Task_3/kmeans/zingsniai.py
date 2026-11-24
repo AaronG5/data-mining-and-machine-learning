@@ -13,7 +13,6 @@ from bendra import (
    kmeans,
    kmeans_antraste,
    parametrai_tekstu,
-   perkelimo_lentele,
    rez_katalogas,
    statistikos,
    suderinti,
@@ -39,8 +38,9 @@ def zingsnis1(erdves):
    rez = rez_katalogas(1)
    X = erdves["originali"]
    lentele, zymes = k_kreive(X)
-   k_lentele(lentele, len(X)).to_csv(rez / "k_selection_original.csv", index=False)
-   print(k_lentele(lentele, len(X)).to_string(index=False))
+   su_metodais = k_lentele(lentele, len(X))
+   su_metodais.to_csv(rez / "k_selection_original.csv", index=False)
+   print(su_metodais.to_string(index=False))
 
    k_metodu = metodu_k(lentele, len(X))
    for failas, metodas, stulp, pavadinimas, ylab in [
@@ -132,8 +132,10 @@ def zingsnis3(erdves, X_nenorm, kodai, klases):
       statistikos(X_nenorm, zymes[erdve]).to_csv(rez / f"statistics_{erdve}.csv")
       sutapimas = sutapimo_lentele(labels_ref, zymes[erdve], atitikmenys)
       sutapimas.to_csv(rez / f"matching_clusters_{erdve}.csv")
-      perkelimo_lentele(labels_ref, zymes[erdve], sutapimas).to_csv(rez / f"separated_clusters_{erdve}.csv")
-      print(f"{ERDVIU_PAVADINIMAI[erdve]}:\n{sutapimas}\n")
+      # Sutampančių objektų matrica: originalios erdvės klasteriai (eilutės) vs sumažintos erdvės (stulpeliai)
+      matrica = pd.crosstab(pd.Series(labels_ref, name="originali"), pd.Series(zymes[erdve], name=erdve))
+      matrica.to_csv(rez / f"overlap_matrix_{erdve}.csv")
+      print(f"{ERDVIU_PAVADINIMAI[erdve]}:\n{sutapimas}\n\n{matrica}\n")
 
    for proj in ["PCA", "UMAP"]:
       Z = erdves[f"{proj.lower()}2"]
@@ -243,16 +245,7 @@ def zingsnis5(erdves):
    ).T
    sutapimai.columns = [f"klasteris {c} sutampa %" if c != "viso" else "viso sutampa %" for c in sutapimai.columns]
    sutapimai.rename_axis("erdvė").to_csv(rez / "matching_clusters.csv")
-
-   perkelimai = pd.DataFrame(
-      {
-         ERDVIU_PAVADINIMAI[e]: pd.read_csv(rez3 / f"separated_clusters_{e}.csv", index_col=0)["perkelta %"]
-         for e in SUMAZINTOS
-      }
-   ).T
-   perkelimai.columns = [f"iš klasterio {c} perkelta %" for c in perkelimai.columns]
-   perkelimai.rename_axis("erdvė").to_csv(rez / "separated_clusters.csv")
-   print(f"\n{sutapimai}\n\n{perkelimai}")
+   print(f"\n{sutapimai}")
 
 
 if __name__ == "__main__":
