@@ -1,6 +1,6 @@
-erdvė          , parametrai                                 , k, Silhouette, Calinski-Harabasz, Davies-Bouldin, Jaccard, ARI  , NMI  , stabilumas (ARI vid ± SN)
-Originali (16D), "k=3, euclidean, init=k-means++, n_init=20", 3,      0.526,           622.406,          0.704,   1.0  , 1.0  , 1.0  , 1.000 ± 0.000
-PCA (5D)       , "k=3, euclidean, init=k-means++, n_init=20", 3,      0.595,           858.569,          0.569,   1.0  , 1.0  , 1.0  , 1.000 ± 0.000
-PCA (2D)       , "k=3, euclidean, init=k-means++, n_init=20", 3,      0.763,          2125.975,          0.354,   1.0  , 1.0  , 1.0  , 1.000 ± 0.000
-UMAP (5D)      , "k=5, euclidean, init=k-means++, n_init=20", 5,      0.837,          4349.774,          0.233,   0.491, 0.435, 0.654, 0.980 ± 0.047
-UMAP (2D)      , "k=5, euclidean, init=k-means++, n_init=20", 5,      0.815,          4076.57 ,          0.252,   0.491, 0.435, 0.654, 0.981 ± 0.039
+erdvė,parametrai,k,Silhouette,Calinski-Harabasz,Davies-Bouldin,Jaccard,ARI,NMI,stabilumas (ARI vid ± SN)
+Originali (16D),"k=3, euclidean, init=k-means++, n_init=20",3,0.526,622.406,0.704,1.0,1.0,1.0,1.000 ± 0.000
+PCA (5D),"k=3, euclidean, init=k-means++, n_init=20",3,0.595,858.569,0.569,1.0,1.0,1.0,1.000 ± 0.000
+PCA (2D),"k=3, euclidean, init=k-means++, n_init=20",3,0.763,2125.975,0.354,1.0,1.0,1.0,1.000 ± 0.000
+UMAP (5D),"k=5, euclidean, init=k-means++, n_init=20",5,0.837,4349.774,0.233,0.491,0.435,0.654,0.980 ± 0.047
+UMAP (2D),"k=5, euclidean, init=k-means++, n_init=20",5,0.815,4076.57,0.252,0.491,0.435,0.654,0.981 ± 0.039
